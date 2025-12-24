@@ -15032,6 +15032,31 @@ async function listInstalled(kind) {
     const entries = import_fs4.default.readdirSync(dir, { withFileTypes: true });
     for (const entry of entries) {
       if (!entry.isDirectory() || entry.name.startsWith(".")) continue;
+      if (k === "runtime" && entry.name === "agents") {
+        const agentsDir = import_path4.default.join(dir, "agents");
+        if (import_fs4.default.existsSync(agentsDir)) {
+          const agentEntries = import_fs4.default.readdirSync(agentsDir, { withFileTypes: true });
+          for (const agentEntry of agentEntries) {
+            if (!agentEntry.isDirectory() || agentEntry.name.startsWith(".")) continue;
+            const agentDir = import_path4.default.join(agentsDir, agentEntry.name);
+            const runtimePath2 = import_path4.default.join(agentDir, "runtime.json");
+            if (import_fs4.default.existsSync(runtimePath2)) {
+              const runtimeMeta = JSON.parse(import_fs4.default.readFileSync(runtimePath2, "utf-8"));
+              packages.push({
+                id: `runtime:${agentEntry.name}`,
+                kind: "runtime",
+                name: agentEntry.name,
+                version: runtimeMeta.version || "unknown",
+                description: `${agentEntry.name} agent`,
+                category: "agent",
+                installedAt: runtimeMeta.installedAt,
+                path: agentDir
+              });
+            }
+          }
+        }
+        continue;
+      }
       const pkgDir = import_path4.default.join(dir, entry.name);
       const manifestPath = import_path4.default.join(pkgDir, "manifest.json");
       const runtimePath = import_path4.default.join(pkgDir, "runtime.json");
