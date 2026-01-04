@@ -14831,6 +14831,7 @@ async function resolvePackage(id) {
     // Install-related properties
     npmPackage: pkg.npmPackage,
     pipPackage: pkg.pipPackage,
+    postInstall: pkg.postInstall,
     binary: pkg.binary,
     installDir: pkg.installDir
   };
@@ -15012,6 +15013,14 @@ async function installSinglePackage(pkg, options = {}) {
           execSync2(`"${npmCmd}" init -y`, { cwd: installPath, stdio: "pipe" });
         }
         execSync2(`"${npmCmd}" install ${pkg.npmPackage}`, { cwd: installPath, stdio: "pipe" });
+        if (pkg.postInstall) {
+          onProgress?.({ phase: "postInstall", package: pkg.id, message: pkg.postInstall });
+          const postInstallCmd = pkg.postInstall.replace(
+            /^npx\s+(\S+)/,
+            `"${import_path4.default.join(installPath, "node_modules", ".bin", "$1")}"`
+          );
+          execSync2(postInstallCmd, { cwd: installPath, stdio: "pipe" });
+        }
         import_fs4.default.writeFileSync(
           import_path4.default.join(installPath, "manifest.json"),
           JSON.stringify({
@@ -15020,6 +15029,7 @@ async function installSinglePackage(pkg, options = {}) {
             name: pkgName,
             version: pkg.version || "latest",
             npmPackage: pkg.npmPackage,
+            postInstall: pkg.postInstall,
             installedAt: (/* @__PURE__ */ new Date()).toISOString(),
             source: "npm"
           }, null, 2)

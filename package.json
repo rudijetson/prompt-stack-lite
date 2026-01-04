@@ -19,7 +19,7 @@
     "@prompt-stack/manifest": "workspace:*",
     "@prompt-stack/registry-client": "workspace:*",
     "@prompt-stack/runner": "workspace:*",
-    "better-sqlite3": "^11.0.0"
+    "better-sqlite3": "^12.5.0"
   },
   "devDependencies": {
     "esbuild": "^0.27.2"
